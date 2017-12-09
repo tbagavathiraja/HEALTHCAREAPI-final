@@ -5,5 +5,5 @@ const dbConfig={
   database:'healthcare'
 }
 
-modulle.exports=dbConfig;
+module.exports=dbConfig;
 
