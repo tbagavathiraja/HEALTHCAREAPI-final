@@ -2,12 +2,28 @@ var q = require('q');
 
 var sessionModel = {
 
+    addSession: function (connection, session) {
+        var deferred = q.defer();
+        var sql = 'INSERT INTO `user_session`  (`user_id`, `session_auth_token`, `expiry_time`) VALUES ' +
+            ' (?, ?, ?) ';
+        connection.query(sql, [session.user_id, session.session_auth_token,session.expiry_time], function (err, user) {
+            if (err) {
+                console.log("DB Error at addSession: ", err.message);
+                deferred.reject("Server Error Occured");
+            }
+            else {
+                deferred.resolve(session);
+            }
+        });
+        return deferred.promise;
+    },
+
     checkSession: function (connection, token) {
         var deferred = q.defer();
         var sql = 'select user_session_id,user_id,session_auth_token,expiry_time from user_session';
         connection.query(sql, function (err, result) {
             if (err) {
-                console.log("here"+err.message)
+                console.log("here" + err.message)
                 deferred.reject('Server Error Occured');
             }
             else {
