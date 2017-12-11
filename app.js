@@ -22,38 +22,17 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', index);
-app.use('/users', users);
-
 loadMiddlewares();
 
 
 function loadMiddlewares() {
     var middlewareFile = require(baseDir+'/middlewares/middleware');
+
     middlewareFile.middlewareList.forEach(function (middleware) {
         app.use(middleware.run);
     });
 }
-
-
-
-app.use('/', require(baseDir+'/routes/common'));
-// If no route is matched by now, it must be a 404
-
-app.use(function (req, res, next) {
-    const err = new Error('Not Found');
-    err.status = 404;
-    next(err);
-
-});
-app.use(function (err, req, res, next) {
-    if (err.status == 404) {
-        res.status(err.status). send(err.stack)
-    } else {
-        res.status( 500).send(err.stack);
-    }
-});
-
+app.use(require(baseDir+'/routes'));
 
 app.listen(function () {
     console.log("Express app listenig on port 5400");
