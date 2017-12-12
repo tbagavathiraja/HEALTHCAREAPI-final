@@ -33,12 +33,13 @@ userModel = {
             "JOIN healthcare.user_role_type urt ON ur.role_id=urt.role_id where u.mail_id = ? AND u.password=? "+
             " AND u.status=1 LIMIT 0,1 ";
 
-        connection.query(sql, [data.email, data.password], function (err, user) {
+        connection.query(sql, [data.username, data.password], function (err, user) {
             if (err) {
                 console.log("DB Error at authenticate: ", err.message);
                 deferred.reject("Server Error Occured");
             }
             else {
+               // console.log("IIIIIIII"+JSON.stringify(user)+"  ");
                 deferred.resolve(user);
             }
         });

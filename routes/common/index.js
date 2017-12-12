@@ -10,12 +10,12 @@ var login = {
   authenticateUser: function (req, res) {
     console.log('Authenticating user')
     var data = req.body
-
+    res.setHeader('content-type', 'application/json');
     return authenticate(data)
       .then(function (result) {
-        return res.send(result).end('')
+        return res.end(JSON.stringify(result));
       }).catch(function (err) {
-        res.end(err.message);
+        res.end(JSON.stringify(err));
       })
   }
 }
@@ -23,37 +23,38 @@ var login = {
 function authenticate (data) {
   var deferred = q.defer()
   console.log(data.password)
-  var userObject
-  var addSessionDetails
+  var userObject;
+  var addSessionDetails;
   dbConnection.getConnection(false, function (err, connection) {
     data.password = utility.hashPassword(data.password)
-    console.log('calling')
     return userModel.authenticate(connection, data)
       .then(function (user) {
-        userObject = user
-        console.log('user : ' + user.length)
+        userObject = user[0]
+
+        console.log("AUTH METHOD")
+        console.log('user : ' + JSON.stringify(user))
         // Check if data present
-        if (!user || user === null || user.length == 0) {
+
+        if (!user || user === null||user===undefined||JSON.stringify(user).length===2) {
           throw Error('INVALID_CREDENTIALS')
         }
         else {
-          console.log('ELSEs')
-          user_type = user.role_type_name;
+          role_type_name = user.role_type_name;
           var token = utility.hashPassword(user.user_id + utility.current_datetime())
           addSessionDetails = {
             session_auth_token: token,
             expiry_time: utility.add_minute_current_datetime(5),
             user_id: user.user_id
           }
+          userObject. session_auth_token=token;
+          userObject.expiry_time=addSessionDetails.expiry_time;
         }
         return sessionModel.addSession(connection, addSessionDetails)
       })
       .then(function (session) {
-        let userInfo = []
-        userInfo.push(userObject)
-        userInfo.push(addSessionDetails)
-        console.log('THEM')
-        return deferred.resolve(userInfo)
+        userObject.status="success";
+        console.log(JSON.stringify(userObject));
+        return deferred.resolve(userObject)
       })
       .catch(function (error) {
         console.log(error.message)
@@ -63,5 +64,5 @@ function authenticate (data) {
   return deferred.promise
 }
 
-router.post('/login', login.authenticateUser)
+router.post('/authenticate', login.authenticateUser)
 module.exports = router

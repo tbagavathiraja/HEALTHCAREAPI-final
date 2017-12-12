@@ -30,7 +30,7 @@ var middlewares = {
       description: 'Validate the session token',
       run: function (req, res, next) {
         // Add Url to skip from Auth token validation
-        if (req.url === 'authenticate'
+        if (req.url === '/authenticate'
           || req.url === '/reset-password' || req.url === 'change-password') {
           next()
         } else {
