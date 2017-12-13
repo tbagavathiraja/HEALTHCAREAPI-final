@@ -5,6 +5,7 @@ var router = express.Router()
 var dbConnection = require(baseDir + '/services/mysql')
 const q = require('q')
 var utility = require(baseDir + '/utilities/utilityMethods')
+var userModel=require(baseDir+'/models/users/user');
 var login = {
 
   authenticateUser: function (req, res) {
@@ -15,7 +16,7 @@ var login = {
       .then(function (result) {
         return res.end(JSON.stringify(result));
       }).catch(function (err) {
-        res.end(JSON.stringify(err));
+        res.send(JSON.stringify(err));
       })
   }
 }
@@ -57,8 +58,11 @@ function authenticate (data) {
         return deferred.resolve(userObject)
       })
       .catch(function (error) {
-        console.log(error.message)
-        return deferred.reject(error)
+        console.log("HERE"+error.message)
+        let err={
+          'Error':error.message
+        }
+        return deferred.reject(err)
       })
   })
   return deferred.promise

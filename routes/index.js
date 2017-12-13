@@ -1,5 +1,4 @@
-var express = require('express');
-var router = require('./common')
+var router = require('./user')
 
 /* GET home page. */
 router.get('/', function(req, res, next) {

@@ -31,7 +31,7 @@ var middlewares = {
       run: function (req, res, next) {
         // Add Url to skip from Auth token validation
         if (req.url === '/authenticate'
-          || req.url === '/reset-password' || req.url === 'change-password') {
+          || req.url === '/reset-password' || req.url === '/change-password') {
           next()
         } else {
           var session_token = req.headers['x-user-token']
