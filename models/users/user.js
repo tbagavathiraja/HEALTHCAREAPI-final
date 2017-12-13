@@ -90,6 +90,42 @@ userModel = {
       }
     })
     return deferred.promise
+  },
+  getUserDetailsByRole(connection,role){
+    var deferred=q.defer();
+    var sql=" " +
+      "SELECT " +
+      "  u.user_id, " +
+      "  u.mail_id,CONCAT " +
+      "  ( " +
+      "    ud.first_name, " +
+      "    ud.last_name " +
+      "  ) AS name, ud.location, " +
+      "  ud.phone_number " +
+      "FROM " +
+      "  healthcare.`user` u " +
+      "JOIN healthcare.user_details ud ON " +
+      "  u.user_id = ud.user_id " +
+      "JOIN healthcare.user_role ur ON " +
+      "  u.user_id = ur.user_id " +
+      "WHERE " +
+      "  ur.role_id =( " +
+      "    SELECT " +
+      "      role_id " +
+      "    FROM " +
+      "      healthcare.user_role_type " +
+      "    WHERE " +
+      "      role_type_name = ? " +
+      "  ); ";
+    connection.query(sql,[role],function (err,result) {
+      if(err){
+        deferred.reject(err)
+      }
+      else{
+        deferred.resolve(result);
+      }
+    })
+    return deferred.promise;
   }
 
 }

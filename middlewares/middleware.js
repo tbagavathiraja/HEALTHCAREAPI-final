@@ -35,7 +35,7 @@ var middlewares = {
           next()
         } else {
           var session_token = req.headers['x-user-token']
-          console.log('session token is : ' + session_token)
+          console.log('session token is : ' + session_token+"  "+JSON.stringify(req.headers))
           if (!session_token) {
             return res.send('INVALID_TOKEN').end('')
           } else {

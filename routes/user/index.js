@@ -23,8 +23,42 @@ var user = {
         }
         return res.send(JSON.stringify(err)).end('')
       })
-  }
+  } ,
+  getUsers : function(req,res){
+    console.log("geeting information....");
+    res.setHeader('content-type','application/json')
+    var role=req.url.split('/')[2];
+    return getUserDetails(role)
+      .then(function (result) {
+        res.status=responseConstants.success;
+        console.log("RES : "+JSON.stringify(result))
+        return res.send(result).end('');
+      }).catch(function (err) {
+        return res.send(JSON.stringify(err)).end('')
+      })
 
+  },
+
+}
+
+function getUserDetails (role) {
+  var deferred=q.defer()
+
+  dbConnection.getConnection(false,function (err,connection) {
+    if(err){
+      throw Error('DB ERROR OCCURED');
+    } else{
+          return userModel.getUserDetailsByRole(connection,role)
+            .then(function (doctorsDetails) {
+              deferred.resolve(doctorsDetails)
+            })
+            .catch(function (error) {
+              deferred.reject(err)
+            })
+    }
+
+  })
+  return deferred.promise;
 }
 
 function createUser (data) {
@@ -87,4 +121,5 @@ function getRoleId (role) {
 }
 
 router.post('/adduser', user.addUser)
+router.get('/getusers/doctor',user.getUsers)
 module.exports = router

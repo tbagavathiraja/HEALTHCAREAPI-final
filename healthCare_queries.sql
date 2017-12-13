@@ -45,4 +45,49 @@ ALTER TABLE healthcare.`user`ADD CONSTRAINT uc_mail UNIQUE (mail_id);
 INSERT INTO healthcare.user_details (user_id,first_name,last_name,location,phone_number,created_date) VALUES(?,?,?,?,?,?);
 INSERT INTO healthcare.user_role (role_id,user_id) VALUES (?,?);
 
+SELECT
+	u.user_id,
+	u.mail_id,CONCAT
+	(
+		ud.first_name,
+		ud.last_name
+	) AS name, ud.location,
+	ud.phone_number
+FROM
+	healthcare.`user` u
+JOIN healthcare.user_details ud ON
+	u.user_id = ud.user_id
+JOIN healthcare.user_role ur ON
+	u.user_id = ur.user_id
+WHERE
+	ur.role_id =(
+		SELECT
+			role_id
+		FROM
+			healthcare.user_role_type
+		WHERE
+			role_type_name = 'patient'
+	);	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
