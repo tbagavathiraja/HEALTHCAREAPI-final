@@ -39,7 +39,7 @@ userModel = {
         deferred.reject('Server Error Occured' + err.message)
       }
       else {
-        // console.log("IIIIIIII"+JSON.stringify(user)+"  ");
+         console.log(JSON.stringify(user)+"  ");
         deferred.resolve(user)
       }
     })
@@ -126,7 +126,70 @@ userModel = {
       }
     })
     return deferred.promise;
+  } ,
+
+  verifyUser(connection,data) {
+    var deferred = q.defer();
+    console.log("hai from verifyUser")
+console.log(JSON.stringify(data))
+    var sql = 'SELECT u.user_id,u.mail_id,CONCAT(ud.first_name," ",ud.last_name) AS name FROM 	healthcare.`user` u ' +
+      'JOIN healthcare.user_details ud ON u.user_id=ud.user_id WHERE u.status=? AND u.mail_id=?';
+    connection.query(sql, [1,data.username], function (err, result) {
+      if (err) {
+
+        deferred.reject(err);
+      } else {
+        deferred.resolve(result);
+      }
+    })
+    return deferred.promise;
+  } ,
+  
+  trackResetPassword: function (connection,data) {
+    var deferred = q.defer();
+    console.log("hai from resetLInk")
+    console.log(JSON.stringify(data))
+    var sql = 'insert into password_reset (user_id,reset_token,status,expiry_time) values(?,?,?,?);';
+    connection.query(sql, [data.user_id,data.token,1,data.expiry_time], function (err, result) {
+      if (err) {
+        console.log('error' +err)
+        deferred.reject(err);
+      } else {
+        deferred.resolve(result);
+      }
+    })
+    return deferred.promise;
+  },
+
+  verifyTokenAndTime: function (connection,data){
+  var deferred=q.defer();
+  var sql='SELECT user_id FROM healthcare.password_reset WHERE status=1 AND  ' +
+    'TIMESTAMPDIFF(MINUTE, expiry_time, now())<=5 AND ' +
+    'reset_token=?'
+    connection.queryRow(sql,[data.token],function (err,result) {
+      if(err){
+        deferred.reject(err);
+      }else{
+        deferred.resolve(result);
+      }
+    });
+  return deferred.promise;
+} ,
+
+  updatePassword: function(connection,data){
+    var deferred=q.defer();
+    var sql='UPDATE healthcare.user SET password=? where user_id=?';
+    connection.query(sql,[data.password,data.user_id],function (err,result) {
+      if(err){
+        deferred.reject(err);
+      }else{
+        deferred.resolve(result);
+      }
+    });
+    return deferred.promise;
   }
+
+
 
 }
 

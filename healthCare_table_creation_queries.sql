@@ -50,6 +50,8 @@ SELECT now() FROM DUAL;
 -- 
 DELETE FROM user_role WHERE user_id=1;
 
+DROP TABLE healthcare.password_reset;
+
 
 
 
@@ -102,10 +104,18 @@ CONSTRAINT fk_doctor_domail FOREIGN KEY (doctor_id) REFERENCES healthcare.`user`
 );
 
 DROP TABLE healthcare.doctor_domain;
+DROP TABLE healthcare.password_reset;
 
 
-
-
-
-
+CREATE TABLE `password_reset` (
+  `password_reset_id` int(10) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `reset_token` varchar(50) NOT NULL,
+  `status` TINYINT(2) NOT NULL, 
+  `expiry_time` datetime NOT NULL,
+  PRIMARY KEY (`password_reset_id`),
+  UNIQUE KEY `reset_token` (`reset_token`),
+  KEY `fk_password_reset` (`user_id`),
+  CONSTRAINT `fk_password_reset` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1
 

@@ -1,6 +1,7 @@
 const ApiResponseConstant = {
     /*Common Validation codes starts with 10**  */
-    SUCCESS: "0000",
+    SUCCESS: '0000',
+    FAILURE: '1111',
     PAGE_NOT_FOUND: 404,
     UNAUTHORIZED_ACCESS: 1000,
     ROLE_NOT_AUTHORIZED: 1001,

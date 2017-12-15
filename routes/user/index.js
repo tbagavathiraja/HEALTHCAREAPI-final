@@ -38,8 +38,60 @@ var user = {
       })
 
   },
+  resetPassword: function (req,res) {
+    console.log("updating password....");
+    res.setHeader('content-type','application/json')
+    var data=req.body;
+    return updatePassword(data)
+      .then(function (result) {
+        res.status=responseConstants.success;
+        result.status=responseConstants.SUCCESS;;
+        console.log("RES : "+JSON.stringify(result))
+        return res.send(result).end('');
+      }).catch(function (err) {
+        err['status']=responseConstants.FAILURE;
+        return res.send(JSON.stringify(err)).end('')
+      })
+
+  }
 
 }
+
+function updatePassword (data) {
+  var deferred=q.defer();
+  dbConnection.getConnection(false,function (err,connection) {
+    if(!err){
+      return userModel.verifyTokenAndTime(connection,data)
+        .then(function (result) {
+
+            if (!result) {
+              err ={
+                message :'SESSION EXPIREDD'
+              }
+                throw (err)
+            }
+            else{
+              data.user_id = result.user_id;
+              data.password = utility.hashPassword(data.password)
+              return userModel.updatePassword(connection, data)
+            }
+          })
+          .then(function(result){
+                    deferred.resolve(result)
+          })
+            .catch(function(err){
+              console.log(err)
+            deferred.reject(err);
+          });
+    }
+    else {
+     deferred.reject(err)
+    }
+        })
+  return deferred.promise;
+}
+
+
 
 function getUserDetails (role) {
   var deferred=q.defer()
@@ -119,7 +171,7 @@ function getRoleId (role) {
   }
 
 }
-
+router.put('/updatepassword',user.resetPassword)
 router.post('/adduser', user.addUser)
 router.get('/getusers/doctor',user.getUsers)
 module.exports = router

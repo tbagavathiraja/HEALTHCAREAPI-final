@@ -31,11 +31,11 @@ var middlewares = {
       run: function (req, res, next) {
         // Add Url to skip from Auth token validation
         if (req.url === '/authenticate'
-          || req.url === '/reset-password' || req.url === '/change-password') {
+          || req.url === '/resetpassword' || req.url === '/change-password'|| req.url==='/updatepassword') {
           next()
         } else {
           var session_token = req.headers['x-user-token']
-          console.log('session token is : ' + session_token+"  "+JSON.stringify(req.headers))
+          console.log('session token is : ' + session_token);
           if (!session_token) {
             return res.send('INVALID_TOKEN').end('')
           } else {

@@ -5,10 +5,10 @@ let connectionObject = {};
 let request_name = "";
 mysqlUtilities = require('mysql-utilities')
 var connectionPool = mysql.createPool({
-    host: config.host,
-    user: config.user,
-    password: config.password,
-    database: config.database,
+    host: config.dbConfig.host,
+    user: config.dbConfig.user,
+    password: config.dbConfig.password,
+    database: config.dbConfig.database,
     debug   :  false
 });
 
