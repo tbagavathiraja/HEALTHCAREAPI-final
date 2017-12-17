@@ -40,7 +40,6 @@ var middlewares = {
             return res.send('INVALID_TOKEN').end('')
           } else {
             var sessionObject
-
             dbConnection.getConnection(true,function (err,connection) {
               if (err) {
                 return res.send('UNKNOWN_ERROR_OCCURRED'+err.message).end()
@@ -52,7 +51,7 @@ var middlewares = {
                       console.log('ERROR IN SESSION ')
                       res.send('INVALID_TOKEN').end('')
                     }
-                    sessionObject = session[0];
+                    sessionObject = session;
                     return userModel.getUserSessionInfo(connection, sessionObject.user_id)
                   }).then(function (user) {
                     req.session = user[0]

@@ -59,10 +59,14 @@ DROP TABLE healthcare.password_reset;
  CREATE
 	TABLE
 		user_role(
-			user_id INT(10) NOT NULL,
-			role_id INT(10) NOT NULL PRIMARY KEY AUTO_INCREMENT,
-			CONSTRAINT fk_user FOREIGN KEY(user_id) REFERENCES USER(user_id) ON DELETE CASCADE
-		);
+				user_role_id INT(10) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+				user_id INT(10) NOT NULL,
+				role_type_id int(10) NOT NULL 
+		/*	CONSTRAINT fk_user FOREIGN KEY(user_id) REFERENCES healthcare.`user`(user_id) ON DELETE CASCADE,
+			CONSTRAINT fk_user_role_type FOREIGN KEY(role_type_id) REFERENCES healthcare.user_role_type(role_id) ON DELETE CASCADE			
+		*/
+			);
+
 -- USER_ROLE_TYPE TABLE CREATION
 
 CREATE
@@ -119,3 +123,18 @@ CREATE TABLE `password_reset` (
   CONSTRAINT `fk_password_reset` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1
 
+
+CREATE
+	TABLE
+		speciality_name(
+			speciality_id INT(10) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+			speciality VARCHAR(25) NOT NULL UNIQUE DEFAULT 'ENT'
+		);
+
+CREATE
+	TABLE
+		doctor_specality(
+			doctor_specality_id INT(10) PRIMARY KEY AUTO_INCREMENT,
+			doctor_id INT(11) NOT NULL UNIQUE,
+			speciality_id INT(10) NOT NULL
+		);

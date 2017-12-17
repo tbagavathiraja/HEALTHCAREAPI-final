@@ -19,8 +19,8 @@ var sessionModel = {
 
     checkSession: function (connection, token) {
         var deferred = q.defer();
-        var sql = 'select user_session_id,user_id,session_auth_token,expiry_time from user_session';
-        connection.query(sql, function (err, result) {
+        var sql = 'select user_session_id,user_id,expiry_time from user_session where  session_auth_token = ? and expiry_time > now() LIMIT 0,1';
+        connection.queryRow(sql,[token],function (err, result) {
             if (err) {
                 console.log("here" + err.message)
                 deferred.reject('Server Error Occured');
@@ -43,7 +43,20 @@ var sessionModel = {
             }
         });
         return deferred.promise;
-    }
+    },
+    deleteSession: function (connection, token) {
+        var deferred = q.defer();
+        var sql = "update user_session SET expiry_time = NOW() where session_auth_token = ? ";
+        connection.query(sql, [token], function (err, session) {
+            if (err) {
+                deferred.reject(err);
+            }
+            else {
+                deferred.resolve('success');
+            }
+        });
+        return deferred.promise;
+    },
 }
 
 module.exports = sessionModel;

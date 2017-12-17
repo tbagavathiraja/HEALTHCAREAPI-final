@@ -34,6 +34,19 @@ var services = {
       })
   },
 
+    logout: function (req,res) {
+            var session_token = req.headers['x-user-token'];
+            if (session_token && session_token !== "") {
+                logout(session_token, res).then(function (result) {
+                    return res.send(result).end('');
+                }).catch(function (err) {
+                    return res.send(err).end('');
+                });
+            } else {
+                return res.send().end('');
+            }
+    }
+
 }
 
 function sendResetLink (data) {
@@ -59,14 +72,9 @@ function sendResetLink (data) {
                 .then(function (result) {
                   console.log("in generating")
                   email.resetPassword(user)
-
                 })
-
-
             }
           })
-
-
       }
     }catch (err){
       deferred.reject(err);
@@ -133,7 +141,28 @@ function authenticate (data) {
   return deferred.promise
 }
 
+function logout(session_token, res) {
+    var deferred = q.defer();
+    dbConnection.getConnection(false,function (err, connection) {
+        if (err) {
+            throw ('DB ERROR OCCURED'+err)
+        } else {
+            return sessionModel.deleteSession(connection, session_token)
+                .then(function (session) {
+                    connection.release();
+                    deferred.resolve(session);
+                }).catch(function (error) {
+                    connection.release();
+                    deferred.resolve(error);
+                });
+        }
+
+    });
+    return deferred.promise;
+}
+
+
 router.post('/authenticate', services.authenticateUser)
 router.post('/resetpassword', services.resetPassword)
-
+router.delete('/logout',services.logout)
 module.exports = router

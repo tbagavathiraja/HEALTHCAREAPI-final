@@ -89,11 +89,76 @@ SELECT u.user_id,u.mail_id,CONCAT(ud.first_name," ",ud.last_name) AS name FROM 	
 u.user_id=ud.user_id WHERE u.status=1 AND u.user_id=24;
 
 
-SELECT user_id FROM healthcare.password_reset WHERE status=1 AND  reset_token='1b73f7ec71d4a765bd5f5afd63220f89' AND TIMESTAMPDIFF (MINUTE, expiry_time, now())<=5  LIMIT 0,1;
+SELECT user_id FROM healthcare.password_reset WHERE status=1 AND  reset_token='1b73f7ec71d4a765bd5f5afd63220f89' AND TIMESTAMPDIFF (MINUTE, expiry_time, now())<=30  LIMIT 0,1;
 
 
 SELECT TIMESTAMPDIFF(MINUTE, expiry_time, now()) FROM healthcare.password_reset
 
-SELECT NOW();
+SELECT now();
 
 
+DROP TABLE healthcare.user_role;
+
+-- SELECT DOCTOR BY SPECIALISATIION
+
+SELECT
+	u.user_id,
+	u.mail_id,
+	CONCAT( ud.first_name, ud.last_name ) name,
+	ud.location,
+	ud.phone_number,
+	urt.role_type_name,
+	sn.speciality
+FROM
+	healthcare.`user` u
+JOIN healthcare.user_details ud ON
+	u.user_id = ud.user_id
+JOIN healthcare.user_role ur ON
+	ud.user_id = ur.user_id
+LEFT JOIN healthcare.user_role_type urt ON
+	ur.role_id = urt.role_type_id
+LEFT JOIN healthcare.doctor_speciality s ON
+	s.doctor_id = ur.user_id
+LEFT JOIN speciality_name sn ON
+	s.speciality_id = sn.speciality_id
+WHERE
+	ur.role_id =(
+		SELECT
+			role_type_id
+		FROM
+			user_role_type
+		WHERE
+			role_type_name = 'doctor'
+	) AND sn.speciality='heart';
+
+-- SELECT DOCTOR BY LOCATIION
+
+SELECT
+	u.user_id,
+	u.mail_id,
+	CONCAT( ud.first_name, ud.last_name ) name,
+	ud.location,
+	ud.phone_number,
+	urt.role_type_name,
+	sn.speciality
+FROM
+	healthcare.`user` u
+JOIN healthcare.user_details ud ON
+	u.user_id = ud.user_id
+JOIN healthcare.user_role ur ON
+	ud.user_id = ur.user_id
+LEFT JOIN healthcare.user_role_type urt ON
+	ur.role_id = urt.role_type_id
+LEFT JOIN healthcare.doctor_speciality s ON
+	s.doctor_id = ur.user_id
+LEFT JOIN speciality_name sn ON
+	s.speciality_id = sn.speciality_id
+WHERE
+	ur.role_id =(
+		SELECT
+			role_type_id
+		FROM
+			user_role_type
+		WHERE
+			role_type_name = 'doctor'
+	) AND ud.location='coimbatore';

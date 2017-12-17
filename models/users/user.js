@@ -91,7 +91,7 @@ userModel = {
     })
     return deferred.promise
   },
-  getUserDetailsByRole(connection,role){
+  getUserDetailsByRole: function(connection,role){
     var deferred=q.defer();
     var sql=" " +
       "SELECT " +
@@ -128,15 +128,14 @@ userModel = {
     return deferred.promise;
   } ,
 
-  verifyUser(connection,data) {
+  verifyUser: function(connection,data) {
     var deferred = q.defer();
     console.log("hai from verifyUser")
-console.log(JSON.stringify(data))
+    console.log(JSON.stringify(data))
     var sql = 'SELECT u.user_id,u.mail_id,CONCAT(ud.first_name," ",ud.last_name) AS name FROM 	healthcare.`user` u ' +
       'JOIN healthcare.user_details ud ON u.user_id=ud.user_id WHERE u.status=? AND u.mail_id=?';
     connection.query(sql, [1,data.username], function (err, result) {
       if (err) {
-
         deferred.reject(err);
       } else {
         deferred.resolve(result);
@@ -187,10 +186,49 @@ console.log(JSON.stringify(data))
       }
     });
     return deferred.promise;
-  }
-
-
-
+  } ,
+    filterUserDetails: function(connection,filterOption){
+        var deferred=q.defer();
+        var sql=
+            'SELECT ' +
+            'u.user_id,' +
+            'u.mail_id, ' +
+            'CONCAT( ud.first_name, ud.last_name ) name, ' +
+            'ud.location, ' +
+            'ud.phone_number, ' +
+            'urt.role_type_name, ' +
+            'sn.speciality ' +
+            'FROM ' +
+            ' healthcare.`user` u' +
+            ' JOIN healthcare.user_details ud ON' +
+            ' u.user_id = ud.user_id' +
+            ' JOIN healthcare.user_role ur ON' +
+            ' ud.user_id = ur.user_id' +
+            ' LEFT JOIN healthcare.user_role_type urt ON' +
+            ' ur.role_id = urt.role_type_id' +
+            ' LEFT JOIN healthcare.doctor_speciality s ON' +
+            ' s.doctor_id = ur.user_id' +
+            ' LEFT JOIN speciality_name sn ON' +
+            ' s.speciality_id = sn.speciality_id' +
+            ' WHERE' +
+            ' ur.role_id =(' +
+            ' SELECT' +
+            ' role_type_id' +
+            ' FROM' +
+            ' user_role_type' +
+            ' WHERE' +
+            ' role_type_name =? '+
+            ' ) AND sn.speciality=?';
+        console.log(sql)
+        connection.query(sql,['doctor',filterOption],function (err,result) {
+            if(err){
+                deferred.reject(err);
+            }else{
+                deferred.resolve(result);
+            }
+        });
+        return deferred.promise;
+    }
 }
 
 module.exports = userModel
