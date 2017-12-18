@@ -69,10 +69,79 @@ var user = {
             }).catch(function (err) {
                 return res.send(JSON.stringify(err)).end('')
             })
-    }
+    } ,
+  updateProfile: function (req,res) {
+        console.log("updateing user...")
+    var data = req.body
+    res.setHeader('content-type', 'application/json')
+    return updateUser(data)
+      .then(function (result) {
+        console.log("RES : " + JSON.stringify(result))
+        result.status="success"
+        return res.send(result).end('');
+      }).catch(function (err) {
+        return res.send(JSON.stringify(err)).end('')
+      })
+
+  } ,
+  bookAppointment: function (req,res) {
+    console.log("booking ...")
+    var data = req.body
+    res.setHeader('content-type', 'application/json')
+    return getAppointment(data)
+      .then(function (result) {
+        console.log("RES : " + JSON.stringify(result))
+        result.status="success"
+        return res.send(result).end('');
+      }).catch(function (err) {
+        return res.send(JSON.stringify(err)).end('')
+      })
+
+  }
 
 }
 
+function getAppointment (data) {
+  var deferred = q.defer();
+  dbConnection.getConnection(false,function (err,connection) {
+    if(err){
+      throw ('DB Error occured')
+    }else{
+
+      return userModel.bookAppointment(connection,data)
+        .then(function (Details) {
+          console.log(Details)
+          deferred.resolve(Details)
+        })
+        .catch(function (error) {
+          deferred.reject(error)
+        })
+
+    }
+  })
+  return deferred.promise;
+
+}
+
+function updateUser (data) {
+  var deferred = q.defer()
+  dbConnection.getConnection(false, function (err, connection) {
+    if (err) {
+      throw ('DB ERROR OCCURED');
+    } else {
+      return userModel.updateUserDetails(connection, data)
+        .then(function (Details) {
+            console.log(Details)
+          deferred.resolve(Details)
+        })
+        .catch(function (error) {
+          deferred.reject(error)
+        })
+    }
+  });
+  return deferred.promise;
+
+}
 function filterUsers(filterOption) {
     var deferred = q.defer()
     dbConnection.getConnection(false, function (err, connection) {
@@ -200,6 +269,8 @@ function getRoleId(role) {
     }
 }
 
+router.post('/bookappointment',user.bookAppointment)
+router.put('/updateprofile',user.updateProfile)
 router.get('/filterBy', user.filterBy)
 router.put('/updatepassword', user.resetPassword)
 router.post('/adduser', user.addUser)

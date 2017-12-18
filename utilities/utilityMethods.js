@@ -1,6 +1,7 @@
 const crypto = require("crypto");
 
 var momentTimeZone=require('moment-timezone');
+
 exports.hashPassword = function(password) {
     return crypto.createHash('md5').update(password).digest("hex")
 }

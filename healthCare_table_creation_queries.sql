@@ -138,3 +138,24 @@ CREATE
 			doctor_id INT(11) NOT NULL UNIQUE,
 			speciality_id INT(10) NOT NULL
 		);
+
+CREATE
+	TABLE
+		appointment(
+			appointment_id INT(10) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+			doctor_id int(10)NOT NULL ,
+			patient_id int(10) NOT NULL ,
+			appointment_time TIME NOT NULL,
+			appointment_date VARCHAR(15) NULL,
+			status TINYINT(1) NOT NULL DEFAULT 1 ,
+			CONSTRAINT fk_user_doctor_id FOREIGN KEY (doctor_id) REFERENCES healthcare.`user`(user_id) ,
+			CONSTRAINT fk_user_patient_id FOREIGN KEY (patient_id) REFERENCES healthcare.`user`(user_id)
+		)
+		
+		DROP TABLE appointment;
+
+		
+		
+INSERT INTO healthcare.appointment (doctor_id,patient_id,appointment_time,appointment_date) VALUES(25,109,TIME_FORMAT('22:10:12','%H%i%S'),STR_TO_DATE('2017/02/12','%Y/%m/%d'));
+
+

@@ -97,7 +97,7 @@ function authenticate (data) {
         data.password = utility.hashPassword(data.password)
         return userModel.authenticate(connection, data)
           .then(function (user) {
-            userObject = user[0]
+            userObject = user
             console.log('AUTH METHOD')
             console.log('user : ' + JSON.stringify(user))
             // Check if data present
@@ -113,6 +113,7 @@ function authenticate (data) {
                 expiry_time: utility.add_minute_current_datetime(5),
                 user_id: user.user_id
               }
+              console.log("ADD"+JSON.stringify(addSessionDetails))
               userObject.session_auth_token = token
               userObject.expiry_time = addSessionDetails.expiry_time
             }

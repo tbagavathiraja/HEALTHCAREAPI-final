@@ -12,10 +12,8 @@ var config = require(baseDir + '/config/config.js')
 var middlewares = {
   'middlewareList': [
     {
-      description: 'Sets the headers to allow cross-domain requests.',
       run: function (req, res, next) {
         console.log(req.url)
-        //console.log('Crosss origin request: ',(req.method || '').toUpperCase());
         res.setHeader('Access-Control-Allow-Origin', '*')
         res.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
         res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With,x-user-token,x-candidate-token')
@@ -27,7 +25,6 @@ var middlewares = {
       }
     },
     {
-      description: 'Validate the session token',
       run: function (req, res, next) {
         // Add Url to skip from Auth token validation
         if (req.url === '/authenticate'
@@ -49,13 +46,18 @@ var middlewares = {
                   //console.log('SESSION OBJ : ' +JSON.stringify(session[0]))
                     if (!session || session == null) {
                       console.log('ERROR IN SESSION ')
-                      res.send('INVALID_TOKEN').end('')
+                      let err={
+                        status: 'INVALID_TOKEN'
+                      }
+                      throw (err)
                     }
-                    sessionObject = session;
-                    return userModel.getUserSessionInfo(connection, sessionObject.user_id)
-                  }).then(function (user) {
-                    req.session = user[0]
-                    console.log('req.session: ', req.session);
+                    else {
+                      sessionObject = session;
+                      return userModel.getUserSessionInfo(connection, sessionObject.user_id)
+                    }
+                    }).then(function (user) {
+                    req.session = user;
+                    console.log('req.session: ',req.session );
                     return sessionModel.updateSessionExpiryTime(connection, sessionObject.user_session_id, utility.add_minute_current_datetime(30))
                   }).then(function (session) {
                     console.log("Session updated successfully "+sessionObject.user_session_id+"  "+utility.add_minute_current_datetime(30))
@@ -66,8 +68,8 @@ var middlewares = {
                   }).catch(function (error) {
                     connection.rollback()
                     connection.release()
-                    console.log('EEEEEEEEEEEEEEEE'+error.message)
-                    return res.$end(error)
+                    console.log("ERR "+error)
+                    return res.end(JSON.stringify(error))
                   })
               }
 

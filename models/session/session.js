@@ -26,6 +26,7 @@ var sessionModel = {
                 deferred.reject('Server Error Occured');
             }
             else {
+                console.log(result)
                 deferred.resolve(result);
             }
         });
