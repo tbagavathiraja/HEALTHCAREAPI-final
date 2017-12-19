@@ -46,6 +46,36 @@ userModel = {
     return deferred.promise
   },
 
+  getAppointmentStatus: function (connection, user_id) {
+    var deferred = q.defer()
+console.log("appointment")
+   var sql = '' +
+      'SELECT ' +
+      ' u.mail_id,' +
+      ' CONCAT( ud.first_name, \' \', ud.last_name ) AS name,' +
+      ' ud.location,' +
+      ' ud.phone_number,' +
+      ' app.appointment_date,' +
+      ' app.appointment_time' +
+      ' FROM' +
+      ' user_details ud' +
+      ' JOIN healthcare.`user` u ON' +
+      ' u.user_id = ud.user_id' +
+      ' JOIN healthcare.appointment app ON' +
+      ' ud.user_id = app.patient_id' +
+      ' WHERE' +
+      ' app.status = 1' +
+      ' AND app.doctor_id = ?'
+    connection.query(sql, [user_id], function (err, res) {
+      if (err) {
+        console.log(err)
+        deferred.reject(err)
+      } else {
+        deferred.resolve(res)
+      }
+    });
+    return deferred.promise
+  },
   /* add new user */
 
   addUser: function (connection, data) {
@@ -140,6 +170,20 @@ userModel = {
     var sql = 'SELECT u.user_id,u.mail_id,CONCAT(ud.first_name," ",ud.last_name) AS name FROM 	healthcare.`user` u ' +
       'JOIN healthcare.user_details ud ON u.user_id=ud.user_id WHERE u.status=? AND u.mail_id=?'
     connection.query(sql, [1, data.username], function (err, result) {
+      if (err) {
+        deferred.reject(err)
+      } else {
+        deferred.resolve(result)
+      }
+    })
+    return deferred.promise
+  },
+  getAllUser: function (connection) {
+    var deferred = q.defer()
+
+    var sql = 'SELECT u.mail_id,CONCAT( ud.first_name, ud.last_name ) AS name,ud.location, ud.phone_number FROM healthcare.`user` u JOIN healthcare.user_details ud ON u.user_id = ud.user_id'
+
+    connection.query(sql, [], function (err, result) {
       if (err) {
         deferred.reject(err)
       } else {
@@ -255,7 +299,7 @@ userModel = {
     var sql = 'INSERT INTO healthcare.appointment (doctor_id,patient_id,appointment_time,appointment_date) VALUES(?,?,TIME_FORMAT(?,\'%H%i%S\'),?);'
 
     console.log(sql)
-    connection.query(sql, [data.user_id,data.patient_id,data.time,data.date], function (err, result) {
+    connection.query(sql, [data.user_id, data.patient_id, data.time, data.date], function (err, result) {
 
       if (err) {
         console.log(err)
@@ -265,6 +309,18 @@ userModel = {
       }
     })
     return deferred.promise
+  },
+  deleteUserDetails: function (connection, user_id) {
+    var deferred = q.defer()
+    var sql = 'update user set status=1 where user_id=?'
+    connection.query(sql, [user_id], function (err, result) {
+      if (err) {
+        deferred.reject(err)
+      } else {
+        deferred.resolve(result)
+      }
+    })
+    deferred.promise
   }
 
 }

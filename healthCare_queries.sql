@@ -170,4 +170,31 @@ UPDATE healthcare.user_details ud SET ud.first_name=? , ud.last_name=? ,ud.phone
 
 SELECT u.user_id,u.mail_id, CONCAT( ud.first_name, ud.last_name ) AS name, ud.location, ud.phone_number, sn.speciality FROM  healthcare.`user` u JOIN healthcare.user_details ud ON u.user_id = ud.user_id JOIN healthcare.user_role ur ON ud.user_id = ur.user_id LEFT JOIN healthcare.user_role_type urt ON ur.role_id = urt.role_type_id LEFT JOIN healthcare.doctor_speciality s ON s.doctor_id = ur.user_id LEFT JOIN speciality_name sn ON s.speciality_id = sn.speciality_id WHERE ur.role_id =( SELECT role_id FROM user_role_type WHERE role_type_name ='doctor' );
 
+SELECT u.mail_id,CONCAT( ud.first_name, ud.last_name ) AS name,ud.location, ud.phone_number FROM healthcare.`user` u JOIN healthcare.user_details ud ON u.user_id = ud.user_id;
+SELECT CONCAT('sfsd','sfdsdf','aaaa');
+
+
+SELECT
+	u.mail_id,
+	CONCAT( ud.first_name, ' ', ud.last_name ) AS name,
+	ud.location,
+	ud.phone_number,
+	app.appointment_date,
+	app.appointment_time
+FROM
+	user_details ud
+JOIN healthcare.`user` u ON
+	u.user_id = ud.user_id
+JOIN healthcare.appointment app ON
+	ud.user_id = app.patient_id
+WHERE
+	app.status = 1
+	AND app.doctor_id = 53;
+
+SELECT  u.mail_id, CONCAT( ud.first_name, ' ', ud.last_name ) AS name, ud.location, ud.phone_number, app.appointment_date, app.appointment_time FROM user_details ud JOIN healthcare.`user` u ON u.user_id = ud.user_id JOIN healthcare.appointment app ON ud.user_id = app.patient_id WHERE app.status = 1 AND app.doctor_id =  25;
+
+
+
+
+
 
