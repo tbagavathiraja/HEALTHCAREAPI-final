@@ -117,11 +117,14 @@ function authenticate (data) {
               console.log('ADD' + JSON.stringify(addSessionDetails))
               userObject.session_auth_token = token
               userObject.expiry_time = addSessionDetails.expiry_time
-              if (role_type_name === 'doctor')
-                return getAppointmentDetails(connection, user.user_id)
+              if (role_type_name === 'doctor') {
+              getAppointmentDetails(connection, user.user_id)
                   .then(function (res) {
-                    userObject.appointmentStatus = res;
-                  })
+                   userObject.appointmentStatus = res;
+                  }).catch(function (err) {
+                   deferred.reject(err)
+                 })
+              }
               return sessionModel.addSession(connection, addSessionDetails)
             }
             })
@@ -131,6 +134,7 @@ function authenticate (data) {
             return deferred.resolve(userObject)
           })
           .catch(function (error) {
+            console.log('totally')
             console.log('HERE' + error.message)
             let err = {
               'Error': error.message
@@ -152,9 +156,14 @@ function getAppointmentDetails (connection, user_id) {
   var deferred = q.defer()
   userModel.getAppointmentStatus(connection, user_id)
     .then(function (result) {
+      for(let iloop=0;iloop<result.length;iloop++){
+        result[iloop].date_time = utility.format_date(result[iloop].date_time)
+        result[iloop].appointment_date=result[iloop].date_time.split(' ')[0];
+        result[iloop].appointment_time=result[iloop].date_time.split(' ')[1];
+      }
         deferred.resolve(result)
     }).catch(function (err) {
-        return deferred.reject(err)
+       deferred.reject(err)
       })
   return deferred.promise
 }

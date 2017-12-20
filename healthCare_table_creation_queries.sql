@@ -145,8 +145,7 @@ CREATE
 			appointment_id INT(10) NOT NULL PRIMARY KEY AUTO_INCREMENT,
 			doctor_id int(10)NOT NULL ,
 			patient_id int(10) NOT NULL ,
-			appointment_time TIME NOT NULL,
-			appointment_date VARCHAR(15) NULL,
+			date_time DATETIME NOT NULL,
 			status TINYINT(1) NOT NULL DEFAULT 1 ,
 			CONSTRAINT fk_user_doctor_id FOREIGN KEY (doctor_id) REFERENCES healthcare.`user`(user_id) ,
 			CONSTRAINT fk_user_patient_id FOREIGN KEY (patient_id) REFERENCES healthcare.`user`(user_id)
@@ -156,6 +155,20 @@ CREATE
 
 		
 		
-INSERT INTO healthcare.appointment (doctor_id,patient_id,appointment_time,appointment_date) VALUES(25,109,TIME_FORMAT('22:10:12','%H%i%S'),STR_TO_DATE('2017/02/12','%Y/%m/%d'));
+CREATE TABLE `doctor_history` (
+  `history_id` int(25) NOT NULL AUTO_INCREMENT,
+  `doctor_id` int(11) DEFAULT NULL,
+  `patient_id` int(11) DEFAULT NULL,
+  `checked_date_time` DATETIME NOT NULL,
+  `accepted` tinyint(1) DEFAULT NULL,
+  PRIMARY KEY (`history_id`),
+  KEY `fk_doctor_history` (`doctor_id`),
+  KEY `fk_doctor_history_patient` (`patient_id`),
+  CONSTRAINT `fk_doctor_history` FOREIGN KEY (`doctor_id`) REFERENCES `user` (`user_id`),
+  CONSTRAINT `fk_doctor_history_patient` FOREIGN KEY (`patient_id`) REFERENCES `user` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1
+
+ALTER TABLE doctor_history ADD COLUMN entry_time DATETIME NOT NULL;
+ALTER TABLE doctor_history CHANGE COLUMN `req_time` `req_appointment_time` DATETIME NOT NULL;
 
 

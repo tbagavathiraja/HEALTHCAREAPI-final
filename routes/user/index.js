@@ -98,6 +98,20 @@ var user = {
       })
 
   },
+  updateAppointmentStatus: function (req,res) {
+    var status = req.params['status'];
+    console.log('updating staus ...')
+    var data = req.body
+    res.setHeader('content-type', 'application/json')
+    return updateUserAppointment(data,status)
+      .then(function (result) {
+        result.status = 'success'
+        return res.send(result).end('')
+      }).catch(function (err) {
+        return res.send(JSON.stringify(err)).end('')
+      })
+
+  } ,
   deleteUser: function (req, res) {
     console.log('deleting user')
     res.setHeader('content-type', 'application/json')
@@ -114,7 +128,27 @@ var user = {
   }
 
 }
+function updateUserAppointment(data,status)  {
+  var deferred=q.defer();
 
+  dbConnection.getConnection(false,function (err,connection) {
+    if(err){
+      throw ('DB ERROR OCCURED')
+    }else{
+      return userModel.updateAppointment(connection,data)
+        .then(function (result) {
+          return userModel.updateDoctorHistory(connection,data,status,utility.current_datetime())
+        })
+        .then(function (result) {
+          deferred.resolve(result)
+        })
+        .catch(function (err) {
+          deferred.reject(err)
+        })
+    }
+  })
+  return deferred.promise;
+}
 function removeUser (user_id) {
   var deferred = q.defer()
 
@@ -321,5 +355,6 @@ router.get('/filterBy', user.filterBy)
 router.put('/updatepassword', user.resetPassword)
 router.post('/adduser', user.addUser)
 router.get('/getusers/*', user.getUsers)
+router.put('/updateAppointmentStatus/:status',user.updateAppointmentStatus)
 router.delete('/deleteuser/*', user.deleteUser)
 module.exports = router

@@ -4,7 +4,7 @@ var config = require(baseDir + '/config/config.js');
 let connectionObject = {};
 let request_name = "";
 mysqlUtilities = require('mysql-utilities')
-var connectionPool = mysql.createPool({
+var pool = mysql.createPool({
     host: config.dbConfig.host,
     user: config.dbConfig.user,
     password: config.dbConfig.password,
@@ -12,25 +12,25 @@ var connectionPool = mysql.createPool({
     debug   :  false
 });
 
-connectionPool.on('connection', function(connection) {
+pool.on('connection', function(connection) {
   mysqlUtilities.upgrade(connection);
   mysqlUtilities.introspection(connection);
 });
 
-connectionPool.on('acquire', function (connection) {
+pool.on('acquire', function (connection) {
   connectionObject[connection.threadId] = request_name;
-  /*console.error('Connection %d acquired : Total : %d, Free : %d',connection.threadId, connectionPool._allConnections.length,
-    connectionPool._freeConnections.length,connectionObject);*/
+  /*console.error('Connection %d acquired : Total : %d, Free : %d',connection.threadId, pool._allConnections.length,
+   pool._freeConnections.length,connectionObject);*/
 });
 
-connectionPool.on('release', function (connection) {
+pool.on('release', function (connection) {
   connectionObject[connection.threadId] = "";
-/*  console.error('Connection %d released : Total : %d, Free : %d',connection.threadId, connectionPool._allConnections.length,
-    connectionPool._freeConnections.length,connectionObject);*/
+/*  console.error('Connection %d released : Total : %d, Free : %d',connection.threadId, pool._allConnections.length,
+    pool._freeConnections.length,connectionObject);*/
 });
 
 
-exports.connectionPool = connectionPool;
+exports.connectionPool = pool;
 
 exports.getConnection = function(transaction,callback) {
   if(typeof transaction == 'function'){
@@ -39,7 +39,7 @@ exports.getConnection = function(transaction,callback) {
   }
   request_name = ((new Error().stack).split("at ")[2]).trim();
 
-  connectionPool.getConnection(function(err,connection){
+  pool.getConnection(function(err,connection){
     if (err) {
       if(connection) {
         connection.release();

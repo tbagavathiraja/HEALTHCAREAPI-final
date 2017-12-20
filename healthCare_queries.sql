@@ -191,10 +191,36 @@ WHERE
 	app.status = 1
 	AND app.doctor_id = 53;
 
-SELECT  u.mail_id, CONCAT( ud.first_name, ' ', ud.last_name ) AS name, ud.location, ud.phone_number, app.appointment_date, app.appointment_time FROM user_details ud JOIN healthcare.`user` u ON u.user_id = ud.user_id JOIN healthcare.appointment app ON ud.user_id = app.patient_id WHERE app.status = 1 AND app.doctor_id =  25;
+
+-- GETTING APPOINTMENT STATUS ON LOGIN ONLY FOR DOCTORS ROLE
+SELECT
+	app.doctor_id,
+	app.patient_id,
+	app.status,
+	mail_id,
+	CONCAT( ud.first_name, ' ', ud.last_name ) AS name,
+	ud.location,
+	ud.phone_number,
+	app.appointment_date,
+	app.appointment_time
+FROM
+	user_details ud
+JOIN healthcare.`user` u ON
+	u.user_id = ud.user_id
+JOIN healthcare.appointment app ON
+	ud.user_id = app.patient_id
+WHERE
+	app.status = 1
+	AND app.doctor_id = 53 AND ((app.appointment_date>=CURDATE() AND app.appointment_time>=CURTIME()) OR (app.appointment_date>=CURDATE()));
 
 
+-- FORMATING STRING TO TIMESTAMP
+	INSERT INTO appointment VALUES(2,53,24,STR_TO_DATE('2018-11-12 02:47:25','%Y-%m-%d %H:%i:%s'),1);
 
+-- UPDATE APPOINTMENTSTATUS 
+UPDATE healthcare.appointment SET status=0 WHERE doctor_id=? AND patient_id=? AND appointment_date=? AND appointment_time=?;
 
+-- INSERTING INTO DOCTOR HISTORY
+INSERT INTO healthcare.doctor_history VALUES(?,?,?,?);
 
 

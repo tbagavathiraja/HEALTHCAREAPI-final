@@ -49,23 +49,24 @@ userModel = {
   getAppointmentStatus: function (connection, user_id) {
     var deferred = q.defer()
 console.log("appointment")
-   var sql = '' +
-      'SELECT ' +
-      ' u.mail_id,' +
-      ' CONCAT( ud.first_name, \' \', ud.last_name ) AS name,' +
-      ' ud.location,' +
-      ' ud.phone_number,' +
-      ' app.appointment_date,' +
-      ' app.appointment_time' +
-      ' FROM' +
-      ' user_details ud' +
-      ' JOIN healthcare.`user` u ON' +
-      ' u.user_id = ud.user_id' +
-      ' JOIN healthcare.appointment app ON' +
-      ' ud.user_id = app.patient_id' +
-      ' WHERE' +
-      ' app.status = 1' +
-      ' AND app.doctor_id = ?'
+var sql='SELECT' +
+  ' app.doctor_id,' +
+  ' app.patient_id,' +
+  ' app.status,' +
+  ' u.mail_id,' +
+  ' CONCAT( ud.first_name, \' \', ud.last_name ) AS name,' +
+  ' ud.location,' +
+  ' ud.phone_number,' +
+  ' app.date_time ' +
+  ' FROM' +
+  ' user_details ud' +
+  ' JOIN healthcare.`user` u ON' +
+  ' u.user_id = ud.user_id' +
+  ' JOIN healthcare.appointment app ON' +
+  ' ud.user_id = app.patient_id' +
+  ' WHERE' +
+  ' app.status = 1' +
+  ' AND app.doctor_id = ? AND TIMESTAMPDIFF(MINUTE,  now(),app.date_time)>=0';
     connection.query(sql, [user_id], function (err, res) {
       if (err) {
         console.log(err)
@@ -74,6 +75,51 @@ console.log("appointment")
         deferred.resolve(res)
       }
     });
+    return deferred.promise
+  },
+
+  updateAppointment: function(connection,data){
+    var deferred=q.defer();
+    var sql= 'UPDATE healthcare.appointment SET status=0 WHERE doctor_id=? AND patient_id=? AND date_time=?';
+    connection.query(sql,[data.doctor_id,data.patient_id,data.date_time],function (err,result) {
+      if(err){
+        deferred.reject(err);
+      }else{
+        deferred.resolve(data)
+      }
+    })
+    return deferred.promise;
+  } ,
+  updateDoctorHistory: function(connection,data,status,curr_date){
+    var deferred=q.defer();
+    console.log(data,status,curr_date)
+    var sql='INSERT INTO healthcare.doctor_history (doctor_id,patient_id,checked_date_time,status,req_appointment_time) VALUES (?,?,?,?,?)';
+
+    connection.query(sql,[data.doctor_id,data.patient_id,data.date_time,status,curr_date],function (err,result) {
+      if(err){
+        deferred.reject(err)
+      } else{
+        deferred.resolve(result)
+      }
+    })
+    return deferred.promise
+  } ,
+
+  bookAppointment: function (connection, data) {
+    var deferred = q.defer()
+    console.log('user details', data)
+    var sql = 'INSERT INTO healthcare.appointment (doctor_id,patient_id,date_time) VALUES(?,?,STR_TO_DATE(?,\'%Y-%m-%d %H:%i:%s\'));'
+
+    console.log(sql)
+    connection.query(sql, [data.user_id, data.patient_id, data.date+' '+data.time], function (err, result) {
+
+      if (err) {
+        console.log(err)
+        deferred.reject(err)
+      } else {
+        deferred.resolve(result)
+      }
+    })
     return deferred.promise
   },
   /* add new user */
@@ -268,7 +314,6 @@ console.log("appointment")
       ' WHERE' +
       ' role_type_name =? ' +
       ' ) AND sn.speciality=?'
-    console.log(sql)
     connection.query(sql, ['doctor', filterOption], function (err, result) {
       if (err) {
         deferred.reject(err)
@@ -293,23 +338,6 @@ console.log("appointment")
     return deferred.promise
   },
 
-  bookAppointment: function (connection, data) {
-    var deferred = q.defer()
-    console.log('user details', data)
-    var sql = 'INSERT INTO healthcare.appointment (doctor_id,patient_id,appointment_time,appointment_date) VALUES(?,?,TIME_FORMAT(?,\'%H%i%S\'),?);'
-
-    console.log(sql)
-    connection.query(sql, [data.user_id, data.patient_id, data.time, data.date], function (err, result) {
-
-      if (err) {
-        console.log(err)
-        deferred.reject(err)
-      } else {
-        deferred.resolve(result)
-      }
-    })
-    return deferred.promise
-  },
   deleteUserDetails: function (connection, user_id) {
     var deferred = q.defer()
     var sql = 'update user set status=1 where user_id=?'

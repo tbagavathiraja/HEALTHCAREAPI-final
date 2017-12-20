@@ -2,6 +2,7 @@ var q = require('q');
 
 var sessionModel = {
     addSession: function (connection, session) {
+        console.log('adding')
         var deferred = q.defer();
         var sql = 'INSERT INTO `user_session`  (`user_id`, `session_auth_token`, `expiry_time`) VALUES ' +
             ' (?, ?, ?) ';

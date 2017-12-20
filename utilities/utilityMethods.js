@@ -14,3 +14,7 @@ exports.add_minute_current_datetime = function(minute) {
 exports.current_datetime=function () {
   return momentTimeZone(new Date()).format('YYYY-MM-DD HH:mm:ss');
 }
+
+exports.format_date = function(date){
+  return momentTimeZone(date).format('YYYY-MM-DD HH:mm:ss');
+}
