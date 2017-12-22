@@ -4,7 +4,9 @@ const dbConfig={
   host:'localhost',
   user:'root',
   password:'root',
-  database:'healthcare'
+  database:'healthcare',
+  timezone: 'UTC+0',
+  dateStrings : true
 }
 
 module.exports.dbConfig=dbConfig;

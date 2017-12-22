@@ -110,7 +110,7 @@ function authenticate (data) {
               var token = utility.hashPassword(user.user_id + utility.current_datetime())
               addSessionDetails = {
                 session_auth_token: token,
-                expiry_time: utility.add_minute_current_datetime(5),
+                expiry_time: utility.add_minute_current_datetime(30),
                 user_id: user.user_id
               }
 

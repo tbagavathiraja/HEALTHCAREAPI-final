@@ -223,4 +223,6 @@ UPDATE healthcare.appointment SET status=0 WHERE doctor_id=? AND patient_id=? AN
 -- INSERTING INTO DOCTOR HISTORY
 INSERT INTO healthcare.doctor_history VALUES(?,?,?,?);
 
+-- GET DOCTOR AND USER HISTORY
+ SELECT CONCAT(dn.first_name,' ',dn.last_name) AS doctor_name,  CONCAT(ud.first_name,' ',ud.last_name) AS patient_name,u.mail_id,dh.doctor_id,dh.patient_id,dh.checked_date_time,dh.req_appointment_time,dh.status FROM healthcare.doctor_history dh JOIN healthcare.user_details ud ON dh.patient_id=ud.user_id JOIN healthcare.`user` u ON ud.user_id=u.user_id     JOIN healthcare.user_details dn ON dh.doctor_id=dn .user_id WHERE  dh.doctor_id=53;
 

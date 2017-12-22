@@ -68,7 +68,7 @@ var middlewares = {
                   }).catch(function (error) {
                     connection.rollback()
                     connection.release()
-                    console.log("ERR "+error)
+                    console.log("ERR "+JSON.stringify(error))
                     return res.end(JSON.stringify(error))
                   })
               }

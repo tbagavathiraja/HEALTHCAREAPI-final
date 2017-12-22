@@ -28,7 +28,7 @@ var user = {
   getUsers: function (req, res) {
     console.log('getting information....')
     res.setHeader('content-type', 'application/json')
-    var role = req.url.split('/')[2]
+    var role = req.params['role']
     return getUserDetails(role)
       .then(function (result) {
         res.status = responseConstants.SUCCESS
@@ -98,12 +98,12 @@ var user = {
       })
 
   },
-  updateAppointmentStatus: function (req,res) {
-    var status = req.params['status'];
-    console.log('updating staus ...')
+  updateAppointmentStatus: function (req, res) {
+    var status = req.params['status']
+    console.log('updating status ...')
     var data = req.body
     res.setHeader('content-type', 'application/json')
-    return updateUserAppointment(data,status)
+    return updateUserAppointment(data, status)
       .then(function (result) {
         result.status = 'success'
         return res.send(result).end('')
@@ -111,11 +111,11 @@ var user = {
         return res.send(JSON.stringify(err)).end('')
       })
 
-  } ,
+  },
   deleteUser: function (req, res) {
     console.log('deleting user')
     res.setHeader('content-type', 'application/json')
-    var user_id = req.url.split('/')[2]
+    var user_id = req.params['user_id']
     return removeUser(user_id)
       .then(function (result) {
         res.status = responseConstants.SUCCESS
@@ -125,19 +125,60 @@ var user = {
         return res.send(JSON.stringify(err)).end('')
       })
 
+  },
+  history: function (req, res) {
+    var user_id = req.params['userId']
+    console.log('getting history of ', user_id)
+
+    res.setHeader('content-type', 'application/json')
+    return getUserHistory(user_id)
+      .then(function (result) {
+        res.status = responseConstants.SUCCESS
+        console.log('RES : ' + JSON.stringify(result))
+        return res.send(result).end('')
+      }).catch(function (err) {
+        console.log('response : ', err)
+        return res.send(JSON.stringify(err)).end('')
+      })
   }
 
 }
-function updateUserAppointment(data,status)  {
-  var deferred=q.defer();
 
-  dbConnection.getConnection(false,function (err,connection) {
-    if(err){
+function getUserHistory (user_id) {
+  var deferred = q.defer()
+  dbConnection.getConnection(false, function (err, connection) {
+    if (err) {
       throw ('DB ERROR OCCURED')
-    }else{
-      return userModel.updateAppointment(connection,data)
+    } else {
+      return userModel.getUserHistory(connection, user_id)
+        .then(function (history) {
+          // for changing timezone to local
+          console.log('pending')
+          history.forEach(function (user) {
+            user.checked_date_time = utility.format_date(user.checked_date_time)
+            user.req_appointment_time = utility.format_date(user.req_appointment_time)
+          })
+
+          deferred.resolve(history)
+        })
+        .catch(function (err) {
+          deferred.reject(err)
+        })
+    }
+  })
+  return deferred.promise
+}
+
+function updateUserAppointment (data, status) {
+  var deferred = q.defer()
+
+  dbConnection.getConnection(false, function (err, connection) {
+    if (err) {
+      throw ('DB ERROR OCCURED')
+    } else {
+      return userModel.updateAppointment(connection, data)
         .then(function (result) {
-          return userModel.updateDoctorHistory(connection,data,status,utility.current_datetime())
+          return userModel.updateDoctorHistory(connection, data, status, utility.current_datetime())
         })
         .then(function (result) {
           deferred.resolve(result)
@@ -147,25 +188,26 @@ function updateUserAppointment(data,status)  {
         })
     }
   })
-  return deferred.promise;
+  return deferred.promise
 }
+
 function removeUser (user_id) {
   var deferred = q.defer()
 
   dbConnection.getConnection(false, function (err, connnection) {
     if (err) {
       throw ('DB ERROR OCCURED')
-    } else{
-      return userModel.deleteUserDetails(connection,user_id)
+    } else {
+      return userModel.deleteUserDetails(connection, user_id)
         .then(function (result) {
-        result.status = responseConstants.SUCCESS
-        deferred.resolve(result)
-      }).catch(function (err) {
-        deferred.reject(err);
-      })
+          result.status = responseConstants.SUCCESS
+          deferred.resolve(result)
+        }).catch(function (err) {
+          deferred.reject(err)
+        })
     }
   })
-  return deferred.promise;
+  return deferred.promise
 
 }
 
@@ -354,7 +396,9 @@ router.put('/updateprofile', user.updateProfile)
 router.get('/filterBy', user.filterBy)
 router.put('/updatepassword', user.resetPassword)
 router.post('/adduser', user.addUser)
-router.get('/getusers/*', user.getUsers)
-router.put('/updateAppointmentStatus/:status',user.updateAppointmentStatus)
-router.delete('/deleteuser/*', user.deleteUser)
+router.get('/getusers/:role', user.getUsers)
+router.put('/updateAppointmentStatus/:status', user.updateAppointmentStatus)
+router.delete('/deleteuser/:userId', user.deleteUser)
+router.get('/history/:userId', user.history)
+
 module.exports = router

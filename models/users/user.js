@@ -48,25 +48,25 @@ userModel = {
 
   getAppointmentStatus: function (connection, user_id) {
     var deferred = q.defer()
-console.log("appointment")
-var sql='SELECT' +
-  ' app.doctor_id,' +
-  ' app.patient_id,' +
-  ' app.status,' +
-  ' u.mail_id,' +
-  ' CONCAT( ud.first_name, \' \', ud.last_name ) AS name,' +
-  ' ud.location,' +
-  ' ud.phone_number,' +
-  ' app.date_time ' +
-  ' FROM' +
-  ' user_details ud' +
-  ' JOIN healthcare.`user` u ON' +
-  ' u.user_id = ud.user_id' +
-  ' JOIN healthcare.appointment app ON' +
-  ' ud.user_id = app.patient_id' +
-  ' WHERE' +
-  ' app.status = 1' +
-  ' AND app.doctor_id = ? AND TIMESTAMPDIFF(MINUTE,  now(),app.date_time)>=0';
+    console.log('appointment')
+    var sql = 'SELECT' +
+      ' app.doctor_id,' +
+      ' app.patient_id,' +
+      ' app.status,' +
+      ' u.mail_id,' +
+      ' CONCAT( ud.first_name, \' \', ud.last_name ) AS name,' +
+      ' ud.location,' +
+      ' ud.phone_number,' +
+      ' app.date_time ' +
+      ' FROM' +
+      ' user_details ud' +
+      ' JOIN healthcare.`user` u ON' +
+      ' u.user_id = ud.user_id' +
+      ' JOIN healthcare.appointment app ON' +
+      ' ud.user_id = app.patient_id' +
+      ' WHERE' +
+      ' app.status = 1' +
+      ' AND app.doctor_id = ? AND TIMESTAMPDIFF(MINUTE,  now(),app.date_time)>=0'
     connection.query(sql, [user_id], function (err, res) {
       if (err) {
         console.log(err)
@@ -74,36 +74,49 @@ var sql='SELECT' +
       } else {
         deferred.resolve(res)
       }
-    });
+    })
     return deferred.promise
   },
 
-  updateAppointment: function(connection,data){
-    var deferred=q.defer();
-    var sql= 'UPDATE healthcare.appointment SET status=0 WHERE doctor_id=? AND patient_id=? AND date_time=?';
-    connection.query(sql,[data.doctor_id,data.patient_id,data.date_time],function (err,result) {
-      if(err){
-        deferred.reject(err);
-      }else{
+  updateAppointment: function (connection, data) {
+    var deferred = q.defer()
+    var sql = 'UPDATE healthcare.appointment SET status=0 WHERE doctor_id=? AND patient_id=? AND date_time=?'
+    connection.query(sql, [data.doctor_id, data.patient_id, data.date_time], function (err, result) {
+      if (err) {
+        deferred.reject(err)
+      } else {
         deferred.resolve(data)
       }
     })
-    return deferred.promise;
-  } ,
-  updateDoctorHistory: function(connection,data,status,curr_date){
-    var deferred=q.defer();
-    console.log(data,status,curr_date)
-    var sql='INSERT INTO healthcare.doctor_history (doctor_id,patient_id,checked_date_time,status,req_appointment_time) VALUES (?,?,?,?,?)';
+    return deferred.promise
+  },
+  updateDoctorHistory: function (connection, data, status, curr_date) {
+    var deferred = q.defer()
+    console.log(data, status, curr_date)
+    var sql = 'INSERT INTO healthcare.doctor_history (doctor_id,patient_id,checked_date_time,status,req_appointment_time) VALUES (?,?,?,?,?)'
 
-    connection.query(sql,[data.doctor_id,data.patient_id,data.date_time,status,curr_date],function (err,result) {
-      if(err){
+    connection.query(sql, [data.doctor_id, data.patient_id, data.date_time, status, curr_date], function (err, result) {
+      if (err) {
         deferred.reject(err)
-      } else{
+      } else {
         deferred.resolve(result)
       }
     })
     return deferred.promise
-  } ,
+  },
+
+  getUserHistory: function (connection, user_id) {
+    var deferred = q.defer()
+    var sql=' SELECT CONCAT(dn.first_name,\' \',dn.last_name) AS doctor_name,  CONCAT(ud.first_name,\' \',ud.last_name) AS patient_name,u.mail_id,ud.location,ud.phone_number,dh.doctor_id,dh.patient_id,dh.checked_date_time,dh.req_appointment_time,dh.status FROM healthcare.doctor_history dh JOIN healthcare.user_details ud ON dh.patient_id=ud.user_id JOIN healthcare.`user` u ON ud.user_id=u.user_id     JOIN healthcare.user_details dn ON dh.doctor_id=dn .user_id WHERE  dh.doctor_id=?'
+      connection.query(sql, [user_id], function (err, result) {
+      if (err) {
+        deferred.reject(err)
+      } else {
+        deferred.resolve(result)
+      }
+    })
+    return deferred.promise
+  },
 
   bookAppointment: function (connection, data) {
     var deferred = q.defer()
@@ -111,7 +124,7 @@ var sql='SELECT' +
     var sql = 'INSERT INTO healthcare.appointment (doctor_id,patient_id,date_time) VALUES(?,?,STR_TO_DATE(?,\'%Y-%m-%d %H:%i:%s\'));'
 
     console.log(sql)
-    connection.query(sql, [data.user_id, data.patient_id, data.date+' '+data.time], function (err, result) {
+    connection.query(sql, [data.user_id, data.patient_id, data.date + ' ' + data.time], function (err, result) {
 
       if (err) {
         console.log(err)
