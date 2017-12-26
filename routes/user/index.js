@@ -114,9 +114,10 @@ var user = {
   },
   deleteUser: function (req, res) {
     console.log('deleting user')
+    const mailId = req.params['mailId']
     res.setHeader('content-type', 'application/json')
     var user_id = req.params['user_id']
-    return removeUser(user_id)
+    return removeUser(mailId)
       .then(function (result) {
         res.status = responseConstants.SUCCESS
         console.log('RES : ' + JSON.stringify(result))
@@ -191,14 +192,14 @@ function updateUserAppointment (data, status) {
   return deferred.promise
 }
 
-function removeUser (user_id) {
+function removeUser (mail_id) {
   var deferred = q.defer()
 
-  dbConnection.getConnection(false, function (err, connnection) {
+  dbConnection.getConnection(false, function (err, connection) {
     if (err) {
       throw ('DB ERROR OCCURED')
     } else {
-      return userModel.deleteUserDetails(connection, user_id)
+      return userModel.deleteUserDetails(connection, mail_id)
         .then(function (result) {
           result.status = responseConstants.SUCCESS
           deferred.resolve(result)
@@ -398,7 +399,6 @@ router.put('/updatepassword', user.resetPassword)
 router.post('/adduser', user.addUser)
 router.get('/getusers/:role', user.getUsers)
 router.put('/updateAppointmentStatus/:status', user.updateAppointmentStatus)
-router.delete('/deleteuser/:userId', user.deleteUser)
+router.delete('/deleteuser/:mailId', user.deleteUser)
 router.get('/history/:userId', user.history)
-
 module.exports = router

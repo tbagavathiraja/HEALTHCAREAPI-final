@@ -39,11 +39,12 @@ var middlewares = {
             var sessionObject
             dbConnection.getConnection(true,function (err,connection) {
               if (err) {
+                console.log(err)
                 return res.send('UNKNOWN_ERROR_OCCURRED'+err.message).end()
               } else {
                 return sessionModel.checkSession(connection, session_token)
                   .then(function (session) {
-                  //console.log('SESSION OBJ : ' +JSON.stringify(session[0]))
+                 console.log('SESSION OBJ : ' +JSON.stringify(session[0]))
                     if (!session || session == null) {
                       console.log('ERROR IN SESSION ')
                       let err={

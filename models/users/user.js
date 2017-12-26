@@ -208,7 +208,7 @@ userModel = {
       "  ); ";*/
 
     var sql =
-      'SELECT u.user_id,u.mail_id, CONCAT( ud.first_name, ud.last_name ) AS name, ud.location, ud.phone_number, sn.speciality FROM  healthcare.`user` u JOIN healthcare.user_details ud ON u.user_id = ud.user_id JOIN healthcare.user_role ur ON ud.user_id = ur.user_id LEFT JOIN healthcare.user_role_type urt ON ur.role_id = urt.role_type_id LEFT JOIN healthcare.doctor_speciality s ON s.doctor_id = ur.user_id LEFT JOIN speciality_name sn ON s.speciality_id = sn.speciality_id WHERE ur.role_id =( SELECT role_id FROM user_role_type WHERE role_type_name =\'doctor\' )'
+      'SELECT u.user_id,u.mail_id, CONCAT( ud.first_name, ud.last_name ) AS name, ud.location, ud.phone_number, sn.speciality FROM  healthcare.`user` u JOIN healthcare.user_details ud ON u.user_id = ud.user_id JOIN healthcare.user_role ur ON ud.user_id = ur.user_id LEFT JOIN healthcare.user_role_type urt ON ur.role_id = urt.role_type_id LEFT JOIN healthcare.doctor_speciality s ON s.doctor_id = ur.user_id LEFT JOIN speciality_name sn ON s.speciality_id = sn.speciality_id WHERE ur.role_id =( SELECT role_id FROM user_role_type WHERE role_type_name =\'doctor\' ) AND u.status=1'
     console.log(sql)
     connection.query(sql, ['doctor'], function (err, result) {
       if (err) {
@@ -240,7 +240,7 @@ userModel = {
   getAllUser: function (connection) {
     var deferred = q.defer()
 
-    var sql = 'SELECT u.mail_id,CONCAT( ud.first_name, ud.last_name ) AS name,ud.location, ud.phone_number FROM healthcare.`user` u JOIN healthcare.user_details ud ON u.user_id = ud.user_id'
+    var sql = 'SELECT u.mail_id,CONCAT( ud.first_name, ud.last_name ) AS name,ud.location, ud.phone_number FROM healthcare.`user` u JOIN healthcare.user_details ud ON u.user_id = ud.user_id where u.status =1'
 
     connection.query(sql, [], function (err, result) {
       if (err) {
@@ -353,7 +353,7 @@ userModel = {
 
   deleteUserDetails: function (connection, user_id) {
     var deferred = q.defer()
-    var sql = 'update user set status=1 where user_id=?'
+    var sql = 'update user set status=0 where mail_id=?'
     connection.query(sql, [user_id], function (err, result) {
       if (err) {
         deferred.reject(err)
@@ -361,7 +361,7 @@ userModel = {
         deferred.resolve(result)
       }
     })
-    deferred.promise
+    return deferred.promise
   }
 
 }

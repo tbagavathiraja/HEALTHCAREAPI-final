@@ -19,10 +19,12 @@ var sessionModel = {
     },
 
     checkSession: function (connection, token) {
+      console.log('checking session....')
         var deferred = q.defer();
         var sql = 'select user_session_id,user_id,expiry_time from user_session where  session_auth_token = ? and expiry_time > now() LIMIT 0,1';
         connection.queryRow(sql,[token],function (err, result) {
             if (err) {
+              console.log(err)
                 console.log("here" + err.message)
                 deferred.reject('Server Error Occured');
             }

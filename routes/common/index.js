@@ -36,16 +36,12 @@ var services = {
 
   logout: function (req, res) {
     var session_token = req.headers['x-user-token']
-    if (session_token && session_token !== '') {
-      logout(session_token, res).then(function (result) {
+      return logout(session_token, res).then(function (result) {
         console.log('logout confirmed')
         return res.send(result).end('')
       }).catch(function (err) {
         return res.send(err).end('')
       })
-    } else {
-      return res.send().end('')
-    }
   }
 
 }
