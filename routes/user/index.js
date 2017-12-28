@@ -1,4 +1,4 @@
-var baseDir = process.cwd()
+var baseDir = '/home/ionixx/WebstormProjects/HEALTHCAREAPI-final';
 var router = require('../common')
 var userModel = require(baseDir + '/models/users/user')
 var dbConnection = require(baseDir + '/services/mysql')
@@ -145,14 +145,29 @@ var user = {
 
 }
 
+
+
+
+
 function getUserHistory (user_id) {
+
   var deferred = q.defer()
   dbConnection.getConnection(false, function (err, connection) {
     if (err) {
       throw ('DB ERROR OCCURED')
     } else {
-      return userModel.getUserHistory(connection, user_id)
-        .then(function (history) {
+      return userModel.getUserRole(connection,user_id)
+        .then((role)=>{
+          console.log('result is : ',role)
+          if(!role){
+            throw ('UNAUTHORIZED USER')
+          }
+          if(role['role_name']==='doctor') {
+            return userModel.getDoctorHistory(connection, user_id)
+          }else{
+            return userModel.getPatientHistory(connection,user_id)
+          }
+        }).then(function (history) {
           // for changing timezone to local
           console.log('pending')
           history.forEach(function (user) {
@@ -338,7 +353,7 @@ function getUserDetails (role) {
 
 function createUser (data) {
   var deferred = q.defer()
-  dbConnection.getConnection(false, function (err, connection) {
+  dbConnection.getConnection(true, function (err, connection) {
     data.password = utility.hashPassword(data.password)
     data.createdDate = utility.current_datetime()
     var userId
@@ -347,7 +362,7 @@ function createUser (data) {
       throw Error('DB ERROR OCCURED')
     }
     else {
-      return userModel.addUser(connection, data)
+       userModel.addUser(connection, data)
         .then(function (result) {
           console.log('user table updated')
           userId = result.insertId
@@ -357,34 +372,70 @@ function createUser (data) {
         })
         .then(function (result) {
           console.log('user details table updated')
-          return userModel.adduserRole(connection, data)
+          userModel.adduserRole(connection, data)
         })
         .then(function (result) {
-          console.log('role table updated')
-          let res = {
-            status: 'success'
+
+          if(data.role_id === 2){
+            updateDoctorSpeciality(connection,data)
+              .then(function (result) {
+                console.log('role table updated')
+                let res = {
+                  status: 'success'
+                }
+                connection.commit()
+                connection.release()
+                deferred.resolve(res)
+              })
+              .catch(function(err){
+                deferred.reject(err)
+              })
+          }else {
+            console.log('role table updated')
+            let res = {
+              status: 'success'
+            }
+            connection.commit()
+            connection.release()
+            deferred.resolve(res)
           }
-          connection.commit()
-          connection.release()
-          deferred.resolve(res)
         })
         .catch(function (error) {
-          return deferred.reject(error)
+          console.log('inside main catch',error)
+           deferred.reject(error)
         })
     }
   })
   return deferred.promise
 }
 
+function updateDoctorSpeciality (connection,data) {
+  var deferred=q.defer();
+  userModel.getSpecialityId(connection,data['speciality'])
+    .then(function(result){
+      if(!result){
+        throw ('Error in doctor speciality')
+      }
+       userModel.addDoctorSpeciality(connection,data,result['speciality_id'])
+    })
+    .then(function(result){
+        deferred.resolve(result)
+    })
+    .catch(function(err){
+      deferred.reject(err);
+    })
+  return deferred.promise;
+}
+
 function getRoleId (role) {
   switch (role) {
-    case 'Admin' :
+    case 'admin' :
       return 1
       break
-    case 'Doctor' :
+    case 'doctor' :
       return 2
       break
-    case 'Patient' :
+    case 'patient' :
       return 3
       break
     default:

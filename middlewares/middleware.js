@@ -34,6 +34,7 @@ var middlewares = {
           var session_token = req.headers['x-user-token']
           console.log('session token is : ' + session_token);
           if (!session_token) {
+            console.log('token erroe')
             return res.send('INVALID_TOKEN').end('')
           } else {
             var sessionObject
@@ -42,24 +43,23 @@ var middlewares = {
                 console.log(err)
                 return res.send('UNKNOWN_ERROR_OCCURRED'+err.message).end()
               } else {
-                return sessionModel.checkSession(connection, session_token)
+                console.log('calling....')
+                 sessionModel.checkSession(connection, session_token)
                   .then(function (session) {
-                 console.log('SESSION OBJ : ' +JSON.stringify(session[0]))
-                    if (!session || session == null) {
+                 console.log('SESSION OBJ : ' +JSON.stringify(session))
+                    if (!session) {
                       console.log('ERROR IN SESSION ')
                       let err={
                         status: 'INVALID_TOKEN'
                       }
                       throw (err)
                     }
-                    else {
                       sessionObject = session;
-                      return userModel.getUserSessionInfo(connection, sessionObject.user_id)
-                    }
+                       userModel.getUserSessionInfo(connection, sessionObject.user_id)
                     }).then(function (user) {
                     req.session = user;
                     console.log('req.session: ',req.session );
-                    return sessionModel.updateSessionExpiryTime(connection, sessionObject.user_session_id, utility.add_minute_current_datetime(30))
+                     sessionModel.updateSessionExpiryTime(connection, sessionObject.user_session_id, utility.add_minute_current_datetime(30))
                   }).then(function (session) {
                     console.log("Session updated successfully "+sessionObject.user_session_id+"  "+utility.add_minute_current_datetime(30))
                     connection.commit();

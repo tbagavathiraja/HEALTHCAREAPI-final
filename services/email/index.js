@@ -1,6 +1,6 @@
 var mailer = require('nodemailer')
 var q = require('q')
-var baseDir = process.cwd()
+var baseDir = '/home/ionixx/WebstormProjects/HEALTHCAREAPI-final';
 var router = require(baseDir + '/routes/common')
 var dbConnection = require(baseDir + '/services/mysql')
 var utility = require(baseDir + '/utilities/utilityMethods')

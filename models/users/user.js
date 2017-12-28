@@ -105,10 +105,29 @@ userModel = {
     return deferred.promise
   },
 
-  getUserHistory: function (connection, user_id) {
+  getDoctorHistory: function (connection, user_id) {
     var deferred = q.defer()
-    var sql=' SELECT CONCAT(dn.first_name,\' \',dn.last_name) AS doctor_name,  CONCAT(ud.first_name,\' \',ud.last_name) AS patient_name,u.mail_id,ud.location,ud.phone_number,dh.doctor_id,dh.patient_id,dh.checked_date_time,dh.req_appointment_time,dh.status FROM healthcare.doctor_history dh JOIN healthcare.user_details ud ON dh.patient_id=ud.user_id JOIN healthcare.`user` u ON ud.user_id=u.user_id     JOIN healthcare.user_details dn ON dh.doctor_id=dn .user_id WHERE  dh.doctor_id=?'
-      connection.query(sql, [user_id], function (err, result) {
+    var sql = ' SELECT CONCAT(dn.first_name,\' \',dn.last_name) AS doctor_name,  CONCAT(ud.first_name,\' \',ud.last_name) ' +
+      ' AS patient_name,u.mail_id,ud.location,ud.phone_number,dh.doctor_id,dh.patient_id,dh.checked_date_time, ' +
+      ' dh.req_appointment_time,dh.status FROM healthcare.doctor_history dh JOIN healthcare.user_details ud ON ' +
+      ' dh.patient_id=ud.user_id JOIN healthcare.`user` u ON ud.user_id=u.user_id JOIN ' +
+      ' healthcare.user_details dn ON dh.doctor_id=dn .user_id WHERE  dh.doctor_id=?'
+    connection.query(sql, [user_id], function (err, result) {
+      if (err) {
+        deferred.reject(err)
+      } else {
+        deferred.resolve(result)
+      }
+    })
+    return deferred.promise
+  },
+  getPatientHistory: function (connection, user_id) {
+    var deferred = q.defer()
+    var sql='SELECT CONCAT(dn.first_name,\' \',dn.last_name) AS patient_name,  CONCAT(ud.first_name,\' \',ud.last_name) '+
+   ' AS doctor_name,ud.location,ud.phone_number,u.mail_id,dh.doctor_id,dh.patient_id,dh.checked_date_time,dh.req_appointment_time,dh.status FROM '+
+   ' healthcare.doctor_history dh JOIN healthcare.user_details ud ON dh.doctor_id=ud.user_id JOIN healthcare.`user` '+
+   ' u ON ud.user_id=u.user_id JOIN healthcare.user_details dn ON dh.patient_id=dn .user_id WHERE dh.patient_id=?';
+    connection.query(sql, [user_id], function (err, result) {
       if (err) {
         deferred.reject(err)
       } else {
@@ -166,6 +185,36 @@ userModel = {
     })
     return deferred.promise
   },
+  getSpecialityId: function (connection,speciality) {
+    var deferred = q.defer()
+    var sql = 'select speciality_id from healthcare.`speciality_name` where speciality=?'
+
+    connection.queryRow(sql, [speciality], function (err, result) {
+      if (err) {
+        console.log('err in rrrr',err)
+        deferred.reject(err)
+      }
+      else {
+        deferred.resolve(result)
+      }
+    })
+    return deferred.promise
+  },
+  addDoctorSpeciality: function (connection,data,speciality_id) {
+    console.log('called')
+    var deferred = q.defer()
+    var sql = 'INSERT INTO healthcare.doctor_speciality (doctor_id,speciality_id) VALUES (?,?);'
+
+    connection.query(sql, [data.user_id,speciality_id], function (err, result) {
+      if (err) {
+        deferred.reject(err)
+      }
+      else {
+        deferred.resolve(result)
+      }
+    })
+    return deferred.promise
+  } ,
   adduserRole: function (connection, data) {
     var deferred = q.defer()
     var sql = 'INSERT INTO healthcare.user_role (role_id,user_id) VALUES (?,?)'
@@ -207,8 +256,12 @@ userModel = {
       "      role_type_name = ? " +
       "  ); ";*/
 
-    var sql =
-      'SELECT u.user_id,u.mail_id, CONCAT( ud.first_name, ud.last_name ) AS name, ud.location, ud.phone_number, sn.speciality FROM  healthcare.`user` u JOIN healthcare.user_details ud ON u.user_id = ud.user_id JOIN healthcare.user_role ur ON ud.user_id = ur.user_id LEFT JOIN healthcare.user_role_type urt ON ur.role_id = urt.role_type_id LEFT JOIN healthcare.doctor_speciality s ON s.doctor_id = ur.user_id LEFT JOIN speciality_name sn ON s.speciality_id = sn.speciality_id WHERE ur.role_id =( SELECT role_id FROM user_role_type WHERE role_type_name =\'doctor\' ) AND u.status=1'
+    var sql = 'SELECT u.user_id,u.mail_id, CONCAT( ud.first_name, ud.last_name ) AS name, ' +
+      ' ud.location, ud.phone_number, sn.speciality FROM  healthcare.`user` u JOIN healthcare.user_details ud ' +
+      ' ON u.user_id = ud.user_id JOIN healthcare.user_role ur ON ud.user_id = ur.user_id LEFT JOIN ' +
+      ' healthcare.user_role_type urt ON ur.role_id = urt.role_type_id LEFT JOIN healthcare.doctor_speciality s ' +
+      ' ON s.doctor_id = ur.user_id LEFT JOIN speciality_name sn ON s.speciality_id = sn.speciality_id ' +
+      ' WHERE ur.role_id =( SELECT role_id FROM user_role_type WHERE role_type_name =\'doctor\' ) AND u.status=1'
     console.log(sql)
     connection.query(sql, ['doctor'], function (err, result) {
       if (err) {
@@ -240,7 +293,9 @@ userModel = {
   getAllUser: function (connection) {
     var deferred = q.defer()
 
-    var sql = 'SELECT u.mail_id,CONCAT( ud.first_name, ud.last_name ) AS name,ud.location, ud.phone_number FROM healthcare.`user` u JOIN healthcare.user_details ud ON u.user_id = ud.user_id where u.status =1'
+    var sql = 'SELECT u.mail_id,CONCAT( ud.first_name, ud.last_name ) '+
+      ' AS name,ud.location, ud.phone_number FROM healthcare.`user` u '+
+      ' JOIN healthcare.user_details ud ON u.user_id = ud.user_id where u.status =1'
 
     connection.query(sql, [], function (err, result) {
       if (err) {
@@ -362,6 +417,19 @@ userModel = {
       }
     })
     return deferred.promise
+  } ,
+  getUserRole: function (connection,user_id) {
+    var deferred=q.defer();
+    var sql='SELECT role_type_name AS role_name FROM healthcare.user_role_type WHERE role_id='+
+      '(SELECT role_id FROM healthcare.user_role WHERE user_id=?)';
+    connection.queryRow(sql,[user_id],function (err,result) {
+      if(err){
+        deferred.reject(err)
+      }else{
+        deferred.resolve(result)
+      }
+    })
+    return deferred.promise;
   }
 
 }

@@ -3,7 +3,7 @@ const crypto = require("crypto");
 var momentTimeZone=require('moment-timezone');
 
 exports.hashPassword = function(password) {
-    return crypto.createHash('md5').update(password).digest("hex")
+    return crypto.createHash('sha256').update(password).digest("hex")
 }
 
 exports.add_minute_current_datetime = function(minute) {

@@ -223,6 +223,15 @@ UPDATE healthcare.appointment SET status=0 WHERE doctor_id=? AND patient_id=? AN
 -- INSERTING INTO DOCTOR HISTORY
 INSERT INTO healthcare.doctor_history VALUES(?,?,?,?);
 
--- GET DOCTOR AND USER HISTORY
- SELECT CONCAT(dn.first_name,' ',dn.last_name) AS doctor_name,  CONCAT(ud.first_name,' ',ud.last_name) AS patient_name,u.mail_id,dh.doctor_id,dh.patient_id,dh.checked_date_time,dh.req_appointment_time,dh.status FROM healthcare.doctor_history dh JOIN healthcare.user_details ud ON dh.patient_id=ud.user_id JOIN healthcare.`user` u ON ud.user_id=u.user_id     JOIN healthcare.user_details dn ON dh.doctor_id=dn .user_id WHERE  dh.doctor_id=53;
+-- GET DOCTOR  HISTORY
+ SELECT CONCAT(dn.first_name,' ',dn.last_name) AS doctor_name,  CONCAT(ud.first_name,' ',ud.last_name) AS patient_name,u.mail_id,dh.doctor_id,dh.patient_id,dh.checked_date_time,dh.req_appointment_time,dh.status FROM healthcare.doctor_history dh JOIN healthcare.user_details ud ON dh.patient_id=ud.user_id JOIN healthcare.`user` u ON ud.user_id=u.user_id JOIN healthcare.user_details dn ON dh.doctor_id=dn .user_id WHERE  dh.doctor_id=53;
+
+-- GET PATIENT HISTORY
+SELECT CONCAT(dn.first_name,' ',dn.last_name) AS patient_name,  CONCAT(ud.first_name,' ',ud.last_name) AS doctor_name,u.mail_id,dh.doctor_id,dh.patient_id,dh.checked_date_time,dh.req_appointment_time,dh.status FROM healthcare.doctor_history dh JOIN healthcare.user_details ud ON dh.doctor_id=ud.user_id JOIN healthcare.`user` u ON ud.user_id=u.user_id JOIN healthcare.user_details dn ON dh.patient_id=dn .user_id WHERE dh.patient_id=24;
+
+
+-- GET USERROLE FROM USER_ID	
+SELECT role_type_name FROM healthcare.user_role_type WHERE role_id=(SELECT role_id FROM healthcare.user_role WHERE user_id=26);
+
+select speciality_id from healthcare.`speciality_name` where speciality='ENT';
 

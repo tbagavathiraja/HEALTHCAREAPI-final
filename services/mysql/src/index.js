@@ -1,4 +1,4 @@
-var baseDir = process.cwd();
+var baseDir = '/home/ionixx/WebstormProjects/HEALTHCAREAPI-final';
 var mysql = require('mysql');
 var config = require(baseDir + '/config/config.js');
 let connectionObject = {};
@@ -17,17 +17,17 @@ pool.on('connection', function(connection) {
   mysqlUtilities.introspection(connection);
 });
 
-pool.on('acquire', function (connection) {
+/*pool.on('acquire', function (connection) {
   connectionObject[connection.threadId] = request_name;
-  /*console.error('Connection %d acquired : Total : %d, Free : %d',connection.threadId, pool._allConnections.length,
-   pool._freeConnections.length,connectionObject);*/
+  /!*console.error('Connection %d acquired : Total : %d, Free : %d',connection.threadId, pool._allConnections.length,
+   pool._freeConnections.length,connectionObject);*!/
 });
 
 pool.on('release', function (connection) {
   connectionObject[connection.threadId] = "";
-/*  console.error('Connection %d released : Total : %d, Free : %d',connection.threadId, pool._allConnections.length,
-    pool._freeConnections.length,connectionObject);*/
-});
+/!*  console.error('Connection %d released : Total : %d, Free : %d',connection.threadId, pool._allConnections.length,
+    pool._freeConnections.length,connectionObject);*!/
+});*/
 
 
 exports.connectionPool = pool;
@@ -38,6 +38,7 @@ exports.getConnection = function(transaction,callback) {
     transaction = false;
   }
   request_name = ((new Error().stack).split("at ")[2]).trim();
+  console.log('REEE:',request_name)
 
   pool.getConnection(function(err,connection){
     if (err) {

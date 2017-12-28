@@ -1,5 +1,5 @@
-var baseDir = process.cwd()
-var sessionModel = require(baseDir + '/models/session/session')
+var baseDir = '/home/ionixx/WebstormProjects/HEALTHCAREAPI-final';
+var sessionModel = require(baseDir+'/models/session/session')
 var express = require('express')
 var router = express.Router()
 var dbConnection = require(baseDir + '/services/mysql')

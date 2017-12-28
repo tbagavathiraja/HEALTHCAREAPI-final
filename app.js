@@ -35,7 +35,7 @@ function loadMiddlewares() {
 app.use(require(baseDir+'/routes'));
 
 app.listen(function () {
-    console.log("Express app listenig on port 5400");
+    console.log("Express app listenig on port 5800");
 })
 
 module.exports = app;
