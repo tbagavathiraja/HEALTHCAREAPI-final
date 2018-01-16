@@ -20,15 +20,15 @@ const transporter = nodemailer.createTransport({
   requiresAuth: true,
   domains: ["gmail.com", "googlemail.com"],
   auth: {
-    user: 'bagavathiraja.t@ionixxtech.com',
-    pass: 'tbagavathi0511'
+    user: 'maildId',
+    pass: 'password'
   }
 });
 exports.transporter=transporter;
 
 const healthCareAdmin={
-  user: 'bagavathiraja.t@ionixxtech.com',
-  pass: 'tbagavathi0511'
+  user: 'maildId',
+    pass: 'password'
 }
 module.exports.healthCareAdmin=healthCareAdmin;
 
